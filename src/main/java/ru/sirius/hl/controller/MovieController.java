@@ -1,12 +1,12 @@
-package ru.hpclab.hl.module1.controller;
+package ru.sirius.hl.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.hpclab.hl.module1.dto.MovieDto;
-import ru.hpclab.hl.module1.service.MovieService;
+import ru.sirius.hl.dto.MovieDto;
+import ru.sirius.hl.service.MovieService;
 
 import java.util.List;
 

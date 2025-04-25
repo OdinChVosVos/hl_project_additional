@@ -1,4 +1,4 @@
-package ru.hpclab.hl.module1.exception;
+package ru.sirius.hl.exception;
 
 public class UserException extends RuntimeException {
 

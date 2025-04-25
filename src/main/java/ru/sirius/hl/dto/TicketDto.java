@@ -1,4 +1,4 @@
-package ru.hpclab.hl.module1.dto;
+package ru.sirius.hl.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

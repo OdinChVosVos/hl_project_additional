@@ -1,4 +1,4 @@
-package ru.hpclab.hl.module1.service;
+package ru.sirius.hl.service;
 
 import org.springframework.beans.BeanUtils;
 import java.beans.PropertyDescriptor;

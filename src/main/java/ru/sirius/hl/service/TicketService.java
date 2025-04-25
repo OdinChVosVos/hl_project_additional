@@ -1,4 +1,4 @@
-package ru.hpclab.hl.module1.service;
+package ru.sirius.hl.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,8 +6,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
-import ru.hpclab.hl.module1.dto.MovieDto;
-import ru.hpclab.hl.module1.dto.TicketDto;
+import ru.sirius.hl.dto.MovieDto;
+import ru.sirius.hl.dto.TicketDto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

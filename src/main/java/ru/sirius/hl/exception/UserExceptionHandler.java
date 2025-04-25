@@ -1,4 +1,4 @@
-package ru.hpclab.hl.module1.exception;
+package ru.sirius.hl.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

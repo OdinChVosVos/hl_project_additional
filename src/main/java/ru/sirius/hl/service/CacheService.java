@@ -1,4 +1,4 @@
-package ru.hpclab.hl.module1.service;
+package ru.sirius.hl.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

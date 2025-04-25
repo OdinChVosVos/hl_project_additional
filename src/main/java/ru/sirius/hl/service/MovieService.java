@@ -1,93 +1,93 @@
-package ru.hpclab.hl.module1.service;
+package ru.sirius.hl.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
-import ru.hpclab.hl.module1.dto.CustomerDto;
+import ru.sirius.hl.dto.MovieDto;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CustomerService {
+public class MovieService {
     private final Client client;
 
     public void clearAll() {
         executeRequest(
-                client.getCustomerUrl() + "/clear",
+                client.getMovieUrl() + "/clear",
                 HttpMethod.DELETE,
                 null,
                 Void.class,
-                "Successfully cleared all customers",
-                "Failed to clear customers"
+                "Successfully cleared all movies",
+                "Failed to clear movies"
         );
     }
 
-    public List<CustomerDto> getAllCustomers() {
-        CustomerDto[] customers = executeRequest(
-                client.getCustomerUrl(),
+    public List<MovieDto> getAllMovies() {
+        MovieDto[] movies = executeRequest(
+                client.getMovieUrl(),
                 HttpMethod.GET,
                 null,
-                CustomerDto[].class,
-                "Successfully retrieved customers",
-                "Failed to get customers"
+                MovieDto[].class,
+                "Successfully retrieved movies",
+                "Failed to get movies"
         );
-        return Arrays.asList(customers);
+        return Arrays.asList(movies);
     }
 
-    public CustomerDto getCustomerById(Long id) {
+    public MovieDto getMovieById(Long id) {
         return executeRequest(
-                client.getCustomerUrl() + "/" + id,
+                client.getMovieUrl() + "/" + id,
                 HttpMethod.GET,
                 null,
-                CustomerDto.class,
-                "Successfully retrieved customer with ID " + id,
-                "Customer with ID " + id + " not found",
+                MovieDto.class,
+                "Successfully retrieved movie with ID " + id,
+                "Movie with ID " + id + " not found",
                 true
         );
     }
 
-    public void deleteCustomer(Long id) {
+    public void deleteMovie(Long id) {
         executeRequest(
-                client.getCustomerUrl() + "/" + id,
+                client.getMovieUrl() + "/" + id,
                 HttpMethod.DELETE,
                 null,
                 Void.class,
-                "Successfully deleted customer with ID " + id,
-                "Customer with ID " + id + " not found",
+                "Successfully deleted movie with ID " + id,
+                "Movie with ID " + id + " not found",
                 true
         );
     }
 
-    public CustomerDto saveCustomer(CustomerDto customerDto) {
+    public MovieDto saveMovie(MovieDto movieDto) {
         return executeRequest(
-                client.getCustomerUrl(),
+                client.getMovieUrl(),
                 HttpMethod.POST,
-                customerDto,
-                CustomerDto.class,
-                "Successfully saved customer",
-                "Failed to save customer due to invalid data"
+                movieDto,
+                MovieDto.class,
+                "Successfully saved movie",
+                "Failed to save movie due to invalid or duplicate data"
         );
     }
 
-    public CustomerDto updateCustomer(Long id, CustomerDto updatedCustomerDto) {
+    public MovieDto updateMovie(Long id, MovieDto updatedMovieDto) {
         return executeRequest(
-                client.getCustomerUrl() + "/" + id,
+                client.getMovieUrl() + "/" + id,
                 HttpMethod.PUT,
-                updatedCustomerDto,
-                CustomerDto.class,
-                "Successfully updated customer with ID " + id,
-                "Customer with ID " + id + " not found",
+                updatedMovieDto,
+                MovieDto.class,
+                "Successfully updated movie with ID " + id,
+                "Movie with ID " + id + " not found",
                 true
         );
     }

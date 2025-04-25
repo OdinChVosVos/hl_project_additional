@@ -1,16 +1,14 @@
-package ru.hpclab.hl.module1.controller;
+package ru.sirius.hl.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.hpclab.hl.module1.dto.TicketDto;
-import ru.hpclab.hl.module1.service.TicketService;
+import ru.sirius.hl.dto.TicketDto;
+import ru.sirius.hl.service.TicketService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 

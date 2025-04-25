@@ -1,10 +1,10 @@
-package ru.hpclab.hl.module1.configuration;
+package ru.sirius.hl.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
-import ru.hpclab.hl.module1.dto.MovieDto;
-import ru.hpclab.hl.module1.service.CacheService;
+import ru.sirius.hl.dto.MovieDto;
+import ru.sirius.hl.service.CacheService;
 
 @Configuration
 public class ModelMapperConfig {

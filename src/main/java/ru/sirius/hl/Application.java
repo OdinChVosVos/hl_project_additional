@@ -1,4 +1,4 @@
-package ru.hpclab.hl.module1;
+package ru.sirius.hl;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
