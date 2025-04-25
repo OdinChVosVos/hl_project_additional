@@ -1,0 +1,152 @@
+package ru.hpclab.hl.module1.service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import ru.hpclab.hl.module1.dto.CustomerDto;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.NoSuchElementException;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class CustomerService {
+    private final Client client;
+
+    public void clearAll() {
+        executeRequest(
+                client.getCustomerUrl() + "/clear",
+                HttpMethod.DELETE,
+                null,
+                Void.class,
+                "Successfully cleared all customers",
+                "Failed to clear customers"
+        );
+    }
+
+    public List<CustomerDto> getAllCustomers() {
+        CustomerDto[] customers = executeRequest(
+                client.getCustomerUrl(),
+                HttpMethod.GET,
+                null,
+                CustomerDto[].class,
+                "Successfully retrieved customers",
+                "Failed to get customers"
+        );
+        return Arrays.asList(customers);
+    }
+
+    public CustomerDto getCustomerById(Long id) {
+        return executeRequest(
+                client.getCustomerUrl() + "/" + id,
+                HttpMethod.GET,
+                null,
+                CustomerDto.class,
+                "Successfully retrieved customer with ID " + id,
+                "Customer with ID " + id + " not found",
+                true
+        );
+    }
+
+    public void deleteCustomer(Long id) {
+        executeRequest(
+                client.getCustomerUrl() + "/" + id,
+                HttpMethod.DELETE,
+                null,
+                Void.class,
+                "Successfully deleted customer with ID " + id,
+                "Customer with ID " + id + " not found",
+                true
+        );
+    }
+
+    public CustomerDto saveCustomer(CustomerDto customerDto) {
+        return executeRequest(
+                client.getCustomerUrl(),
+                HttpMethod.POST,
+                customerDto,
+                CustomerDto.class,
+                "Successfully saved customer",
+                "Failed to save customer due to invalid data"
+        );
+    }
+
+    public CustomerDto updateCustomer(Long id, CustomerDto updatedCustomerDto) {
+        return executeRequest(
+                client.getCustomerUrl() + "/" + id,
+                HttpMethod.PUT,
+                updatedCustomerDto,
+                CustomerDto.class,
+                "Successfully updated customer with ID " + id,
+                "Customer with ID " + id + " not found",
+                true
+        );
+    }
+
+    private <T> T executeRequest(String url, HttpMethod method, Object body,
+                                 Class<T> responseType, String successMsg,
+                                 String errorMsg) {
+        return executeRequest(url, method, body, responseType, successMsg, errorMsg, false);
+    }
+
+    private <T> T executeRequest(String url, HttpMethod method, Object body,
+                                 Class<T> responseType, String successMsg,
+                                 String errorMsg, boolean notFoundIsExpected) {
+        try {
+            log.info("Sending {} request to {}", method, url);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Accept", "*/*");
+            if (body != null) {
+                headers.set("Content-Type", "application/json");
+            }
+
+            HttpEntity<Object> entity = new HttpEntity<>(body, headers);
+            ResponseEntity<T> response = client.rest().exchange(
+                    url,
+                    method,
+                    entity,
+                    responseType
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info(successMsg);
+                return response.getBody();
+            }
+
+            log.error("{} HTTP Status: {}", errorMsg, response.getStatusCode());
+            throw new RuntimeException(errorMsg);
+
+        } catch (HttpClientErrorException e) {
+            handleClientError(e, errorMsg, notFoundIsExpected);
+            throw new RuntimeException(errorMsg, e); // This line won't be reached
+        } catch (HttpServerErrorException e) {
+            log.error("Server error: {} - Response Body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Server error: " + errorMsg, e);
+        } catch (Exception e) {
+            log.error("Error communicating with external service: {}", e.getMessage());
+            throw new RuntimeException("Communication error: " + errorMsg, e);
+        }
+    }
+
+    private void handleClientError(HttpClientErrorException e, String errorMsg, boolean notFoundIsExpected) {
+        if (notFoundIsExpected && e.getStatusCode() == HttpStatus.NOT_FOUND) {
+            log.error("Not found: {}", e.getResponseBodyAsString());
+            throw new NoSuchElementException(errorMsg);
+        }
+        log.error("Client error: {} - Response Body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+        if (e.getStatusCode().value() == 400) {
+            throw new IllegalArgumentException("Client error: " + errorMsg + ": " + e.getResponseBodyAsString(), e);
+        }
+        throw new RuntimeException("Client error: " + errorMsg, e);
+    }
+}

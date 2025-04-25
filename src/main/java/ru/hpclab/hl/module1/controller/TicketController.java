@@ -12,6 +12,7 @@ import ru.hpclab.hl.module1.service.TicketService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/ticket")
@@ -22,12 +23,50 @@ public class TicketController {
     private final TicketService ticketService;
 
 
-    @GetMapping("/viewers/{movieId}")
+
+    @DeleteMapping("/clear")
+    public ResponseEntity<String> clearAll() {
+        ticketService.clearAll();
+        return ResponseEntity.ok("All tickets cleared");
+    }
+
+    @GetMapping
+    @Operation(summary = "Получение билета `без пагинации")
+    public List<TicketDto> getTickets() {
+        return ticketService.getAllTickets();
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Получение билета")
+    public TicketDto getTicketById(@PathVariable Long id) {
+        return ticketService.getTicketById(id);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Удаление билета физическое")
+    public void deleteTicket(@PathVariable Long id) {
+        ticketService.deleteTicket(id);
+    }
+
+    @PostMapping
+    @Operation(summary = "Создание билета")
+    public TicketDto saveTicket(@RequestBody TicketDto ticket) {
+        return ticketService.saveTicket(ticket);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Изменение билета")
+    public TicketDto updateTicket(
+            @PathVariable Long id,
+            @RequestBody TicketDto ticket) {
+        return ticketService.updateTicket(id, ticket);
+    }
+
+
+    @GetMapping("/statistics")
     @Operation(summary = "Получение максимального количества зрителей на фильме за день")
-    public Long getMaxMovieViewersByDay(
-            @PathVariable Long movieId,
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ticketService.getMaxViewersByDay(movieId, date);
+    public Map<LocalDate, Long> getMaxMovieViewersByDay(@RequestParam("movie") String movieName) {
+        return ticketService.getMaxViewersByDay(movieName);
     }
 
 }
