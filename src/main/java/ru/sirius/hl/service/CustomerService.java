@@ -2,11 +2,7 @@ package ru.sirius.hl.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -20,76 +16,108 @@ import java.util.NoSuchElementException;
 @Slf4j
 @RequiredArgsConstructor
 public class CustomerService {
+
     private final Client client;
+    private final ObservabilityService observabilityService;
 
     public void clearAll() {
-        executeRequest(
-                client.getCustomerUrl() + "/clear",
-                HttpMethod.DELETE,
-                null,
-                Void.class,
-                "Successfully cleared all customers",
-                "Failed to clear customers"
-        );
+        long startTime = observabilityService.startTiming();
+        try {
+            executeRequest(
+                    client.getCustomerUrl() + "/clear",
+                    HttpMethod.DELETE,
+                    null,
+                    Void.class,
+                    "Successfully cleared all customers",
+                    "Failed to clear customers"
+            );
+        } finally {
+            observabilityService.stopTiming(startTime, "external");
+        }
     }
 
     public List<CustomerDto> getAllCustomers() {
-        CustomerDto[] customers = executeRequest(
-                client.getCustomerUrl(),
-                HttpMethod.GET,
-                null,
-                CustomerDto[].class,
-                "Successfully retrieved customers",
-                "Failed to get customers"
-        );
-        return Arrays.asList(customers);
+        long startTime = observabilityService.startTiming();
+        try {
+            CustomerDto[] customers = executeRequest(
+                    client.getCustomerUrl(),
+                    HttpMethod.GET,
+                    null,
+                    CustomerDto[].class,
+                    "Successfully retrieved customers",
+                    "Failed to get customers"
+            );
+            return Arrays.asList(customers);
+        } finally {
+            observabilityService.stopTiming(startTime, "external");
+        }
     }
 
     public CustomerDto getCustomerById(Long id) {
-        return executeRequest(
-                client.getCustomerUrl() + "/" + id,
-                HttpMethod.GET,
-                null,
-                CustomerDto.class,
-                "Successfully retrieved customer with ID " + id,
-                "Customer with ID " + id + " not found",
-                true
-        );
+        long startTime = observabilityService.startTiming();
+        try {
+            return executeRequest(
+                    client.getCustomerUrl() + "/" + id,
+                    HttpMethod.GET,
+                    null,
+                    CustomerDto.class,
+                    "Successfully retrieved customer with ID " + id,
+                    "Customer with ID " + id + " not found",
+                    true
+            );
+        } finally {
+            observabilityService.stopTiming(startTime, "external");
+        }
     }
 
     public void deleteCustomer(Long id) {
-        executeRequest(
-                client.getCustomerUrl() + "/" + id,
-                HttpMethod.DELETE,
-                null,
-                Void.class,
-                "Successfully deleted customer with ID " + id,
-                "Customer with ID " + id + " not found",
-                true
-        );
+        long startTime = observabilityService.startTiming();
+        try {
+            executeRequest(
+                    client.getCustomerUrl() + "/" + id,
+                    HttpMethod.DELETE,
+                    null,
+                    Void.class,
+                    "Successfully deleted customer with ID " + id,
+                    "Customer with ID " + id + " not found",
+                    true
+            );
+        } finally {
+            observabilityService.stopTiming(startTime, "external");
+        }
     }
 
     public CustomerDto saveCustomer(CustomerDto customerDto) {
-        return executeRequest(
-                client.getCustomerUrl(),
-                HttpMethod.POST,
-                customerDto,
-                CustomerDto.class,
-                "Successfully saved customer",
-                "Failed to save customer due to invalid data"
-        );
+        long startTime = observabilityService.startTiming();
+        try {
+            return executeRequest(
+                    client.getCustomerUrl(),
+                    HttpMethod.POST,
+                    customerDto,
+                    CustomerDto.class,
+                    "Successfully saved customer",
+                    "Failed to save customer due to invalid data"
+            );
+        } finally {
+            observabilityService.stopTiming(startTime, "external");
+        }
     }
 
     public CustomerDto updateCustomer(Long id, CustomerDto updatedCustomerDto) {
-        return executeRequest(
-                client.getCustomerUrl() + "/" + id,
-                HttpMethod.PUT,
-                updatedCustomerDto,
-                CustomerDto.class,
-                "Successfully updated customer with ID " + id,
-                "Customer with ID " + id + " not found",
-                true
-        );
+        long startTime = observabilityService.startTiming();
+        try {
+            return executeRequest(
+                    client.getCustomerUrl() + "/" + id,
+                    HttpMethod.PUT,
+                    updatedCustomerDto,
+                    CustomerDto.class,
+                    "Successfully updated customer with ID " + id,
+                    "Customer with ID " + id + " not found",
+                    true
+            );
+        } finally {
+            observabilityService.stopTiming(startTime, "external");
+        }
     }
 
     private <T> T executeRequest(String url, HttpMethod method, Object body,
@@ -128,7 +156,7 @@ public class CustomerService {
 
         } catch (HttpClientErrorException e) {
             handleClientError(e, errorMsg, notFoundIsExpected);
-            throw new RuntimeException(errorMsg, e); // This line won't be reached
+            throw new RuntimeException(errorMsg, e);
         } catch (HttpServerErrorException e) {
             log.error("Server error: {} - Response Body: {}", e.getStatusCode(), e.getResponseBodyAsString());
             throw new RuntimeException("Server error: " + errorMsg, e);

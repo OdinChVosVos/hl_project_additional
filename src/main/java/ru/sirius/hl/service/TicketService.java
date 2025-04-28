@@ -18,82 +18,114 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class TicketService {
+
     private final MovieService movieService;
     private final Client client;
     private final CacheService<MovieDto> movieCache;
-
+    private final ObservabilityService observabilityService;
 
     public void clearAll() {
-        executeRequest(
-                client.getTicketUrl() + "/clear",
-                HttpMethod.DELETE,
-                null,
-                Void.class,
-                "Successfully cleared all tickets",
-                "Failed to clear tickets"
-        );
+        long startTime = observabilityService.startTiming();
+        try {
+            executeRequest(
+                    client.getTicketUrl() + "/clear",
+                    HttpMethod.DELETE,
+                    null,
+                    Void.class,
+                    "Successfully cleared all tickets",
+                    "Failed to clear tickets"
+            );
+        } finally {
+            observabilityService.stopTiming(startTime, "external");
+        }
     }
 
     public List<TicketDto> getAllTickets() {
-        TicketDto[] tickets = executeRequest(
-                client.getTicketUrl(),
-                HttpMethod.GET,
-                null,
-                TicketDto[].class,
-                "Successfully retrieved tickets",
-                "Failed to get tickets"
-        );
-        return Arrays.asList(tickets);
+        long startTime = observabilityService.startTiming();
+        try {
+            TicketDto[] tickets = executeRequest(
+                    client.getTicketUrl(),
+                    HttpMethod.GET,
+                    null,
+                    TicketDto[].class,
+                    "Successfully retrieved tickets",
+                    "Failed to get tickets"
+            );
+            return Arrays.asList(tickets);
+        } finally {
+            observabilityService.stopTiming(startTime, "external");
+        }
     }
 
     public TicketDto getTicketById(Long id) {
-        return executeRequest(
-                client.getTicketUrl() + "/" + id,
-                HttpMethod.GET,
-                null,
-                TicketDto.class,
-                "Successfully retrieved ticket with ID " + id,
-                "Ticket with ID " + id + " not found",
-                true
-        );
+        long startTime = observabilityService.startTiming();
+        try {
+            return executeRequest(
+                    client.getTicketUrl() + "/" + id,
+                    HttpMethod.GET,
+                    null,
+                    TicketDto.class,
+                    "Successfully retrieved ticket with ID " + id,
+                    "Ticket with ID " + id + " not found",
+                    true
+            );
+        } finally {
+            observabilityService.stopTiming(startTime, "external");
+        }
     }
 
     public void deleteTicket(Long id) {
-        executeRequest(
-                client.getTicketUrl() + "/" + id,
-                HttpMethod.DELETE,
-                null,
-                Void.class,
-                "Successfully deleted ticket with ID " + id,
-                "Ticket with ID " + id + " not found",
-                true
-        );
+        long startTime = observabilityService.startTiming();
+        try {
+            executeRequest(
+                    client.getTicketUrl() + "/" + id,
+                    HttpMethod.DELETE,
+                    null,
+                    Void.class,
+                    "Successfully deleted ticket with ID " + id,
+                    "Ticket with ID " + id + " not found",
+                    true
+            );
+        } finally {
+            observabilityService.stopTiming(startTime, "external");
+        }
     }
 
     public TicketDto saveTicket(TicketDto ticketDto) {
-        return executeRequest(
-                client.getTicketUrl(),
-                HttpMethod.POST,
-                ticketDto,
-                TicketDto.class,
-                "Successfully saved ticket",
-                "Failed to save ticket due to invalid or duplicate data"
-        );
+        long startTime = observabilityService.startTiming();
+        try {
+            return executeRequest(
+                    client.getTicketUrl(),
+                    HttpMethod.POST,
+                    ticketDto,
+                    TicketDto.class,
+                    "Successfully saved ticket",
+                    "Failed to save ticket due to invalid or duplicate data"
+            );
+        } finally {
+            observabilityService.stopTiming(startTime, "external");
+        }
     }
 
     public TicketDto updateTicket(Long id, TicketDto updatedTicketDto) {
-        return executeRequest(
-                client.getTicketUrl() + "/" + id,
-                HttpMethod.PUT,
-                updatedTicketDto,
-                TicketDto.class,
-                "Successfully updated ticket with ID " + id,
-                "Ticket with ID " + id + " not found",
-                true
-        );
+        long startTime = observabilityService.startTiming();
+        try {
+            return executeRequest(
+                    client.getTicketUrl() + "/" + id,
+                    HttpMethod.PUT,
+                    updatedTicketDto,
+                    TicketDto.class,
+                    "Successfully updated ticket with ID " + id,
+                    "Ticket with ID " + id + " not found",
+                    true
+            );
+        } finally {
+            observabilityService.stopTiming(startTime, "external");
+        }
     }
 
     public Map<LocalDate, Long> getMaxViewersByDay(String movieName) {
+        long startTime = observabilityService.startTiming();
         try {
             log.info("Calculating max viewers by day for movie: {}", movieName);
 
@@ -152,9 +184,10 @@ public class TicketService {
         } catch (Exception e) {
             log.error("Failed to calculate peak viewers for '{}': {}", movieName, e.getMessage(), e);
             throw new RuntimeException("Peak viewer calculation failed", e);
+        } finally {
+            observabilityService.stopTiming(startTime, "additionalStats");
         }
     }
-
 
     private <T> T executeRequest(String url, HttpMethod method, Object body,
                                  Class<T> responseType, String successMsg,
@@ -192,7 +225,7 @@ public class TicketService {
 
         } catch (HttpClientErrorException e) {
             handleClientError(e, errorMsg, notFoundIsExpected);
-            throw new RuntimeException(errorMsg, e); // This line won't be reached
+            throw new RuntimeException(errorMsg, e);
         } catch (HttpServerErrorException e) {
             log.error("Server error: {} - Response Body: {}", e.getStatusCode(), e.getResponseBodyAsString());
             throw new RuntimeException("Server error: " + errorMsg, e);
